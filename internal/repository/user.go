@@ -9,6 +9,7 @@ import (
 type UserRepository interface {
 	FindUserByID(id uuid.UUID) (*entity.User, error)
 	FindUserByEmail(email string) (*entity.User, error)
+	FindAllUser() ([]entity.User, error)
 }
 
 type userRepository struct {
@@ -33,4 +34,12 @@ func (r *userRepository) FindUserByEmail(email string) (*entity.User, error) {
 		return user, err
 	}
 	return user, nil
+}
+
+func (r *userRepository) FindAllUser() ([]entity.User, error) {
+	users := make([]entity.User, 0)
+	if err := r.db.Find(&users).Error; err != nil {
+		return users, err
+	}
+	return users, nil
 }

@@ -9,6 +9,7 @@ import (
 
 type UserService interface {
 	Login(email string, password string) (*entity.User, error)
+	FindAllUser() ([]entity.User, error)
 }
 
 type userService struct {
@@ -30,4 +31,8 @@ func (s *userService) Login(email string, password string) (*entity.User, error)
 	}
 
 	return user, nil
+}
+
+func (s *userService) FindAllUser() ([]entity.User, error) {
+	return s.userRepository.FindAllUser()
 }

@@ -31,3 +31,12 @@ func (h *UserHandler) Login(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, response.SuccessResponse(http.StatusOK, "login success", user))
 }
+
+func (h *UserHandler) FindAllUser(c echo.Context) error {
+	users, err := h.userService.FindAllUser()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, response.SuccessResponse(http.StatusOK, "sukses menampilkan data user", users))
+}
