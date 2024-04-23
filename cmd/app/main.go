@@ -2,14 +2,22 @@ package main
 
 import (
 	"github.com/zhikariz/go-commerce/configs"
+	"github.com/zhikariz/go-commerce/internal/builder"
+	"github.com/zhikariz/go-commerce/pkg/postgres"
 	"github.com/zhikariz/go-commerce/pkg/server"
 )
 
 func main() {
-	_, err := configs.NewConfig(".env")
+	cfg, err := configs.NewConfig(".env")
 	checkError(err)
 
-	srv := server.NewServer("app", nil, nil)
+	db, err := postgres.InitPostgres(&cfg.Postgres)
+	checkError(err)
+
+	publicRoutes := builder.BuildAppPublicRoutes(db)
+	privateRoutes := builder.BuildAppPrivateRoutes()
+
+	srv := server.NewServer("app", publicRoutes, privateRoutes)
 	srv.Run()
 }
 

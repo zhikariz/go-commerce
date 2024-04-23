@@ -6,9 +6,9 @@ import (
 )
 
 func BuildAuthPublicRoutes() []*route.Route {
-	return router.PublicRoutes()
+	return router.AuthPublicRoutes()
 }
 
 func BuildAuthPrivateRoutes() []*route.Route {
-	return router.PrivateRoutes()
+	return router.AuthPrivateRoutes()
 }
