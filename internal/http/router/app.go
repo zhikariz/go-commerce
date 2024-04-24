@@ -14,14 +14,15 @@ func AppPublicRoutes(userHandler handler.UserHandler) []*route.Route {
 			Path:    "/login",
 			Handler: userHandler.Login,
 		},
+	}
+}
+
+func AppPrivateRoutes(userHandler handler.UserHandler) []*route.Route {
+	return []*route.Route{
 		{
 			Method:  http.MethodGet,
 			Path:    "/users",
 			Handler: userHandler.FindAllUser,
 		},
 	}
-}
-
-func AppPrivateRoutes() []*route.Route {
-	return nil
 }

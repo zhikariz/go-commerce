@@ -9,16 +9,19 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/zhikariz/go-commerce/pkg/response"
 	"github.com/zhikariz/go-commerce/pkg/route"
+	"github.com/zhikariz/go-commerce/pkg/token"
 )
 
 type Server struct {
 	*echo.Echo
 }
 
-func NewServer(serverName string, publicRoutes, privateRoutes []*route.Route) *Server {
+func NewServer(serverName string, publicRoutes, privateRoutes []*route.Route, secretKey string) *Server {
 	e := echo.New()
 
 	e.GET("/", func(c echo.Context) error {
@@ -35,7 +38,7 @@ func NewServer(serverName string, publicRoutes, privateRoutes []*route.Route) *S
 
 	if len(privateRoutes) > 0 {
 		for _, v := range privateRoutes {
-			v1.Add(v.Method, v.Path, v.Handler)
+			v1.Add(v.Method, v.Path, v.Handler, JWTProtection(secretKey))
 		}
 	}
 
@@ -69,4 +72,16 @@ func gracefulShutdown(srv *Server) {
 			srv.Logger.Fatal("Server Shutdown:", err)
 		}
 	}()
+}
+
+func JWTProtection(secretKey string) echo.MiddlewareFunc {
+	return echojwt.WithConfig(echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(token.JwtCustomClaims)
+		},
+		SigningKey: []byte(secretKey),
+		ErrorHandler: func(c echo.Context, err error) error {
+			return c.JSON(http.StatusUnauthorized, response.ErrorResponse(http.StatusUnauthorized, "anda harus login untuk mengakses resource ini"))
+		},
+	})
 }

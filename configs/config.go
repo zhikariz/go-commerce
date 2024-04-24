@@ -11,6 +11,7 @@ type Config struct {
 	Env      string         `env:"ENV" envDefault:"dev"`
 	Port     string         `env:"PORT" envDefault:"8080"`
 	Postgres PostgresConfig `envPrefix:"POSTGRES_"`
+	JWT      JwtConfig      `envPrefix:"JWT_"`
 }
 
 type PostgresConfig struct {
@@ -19,6 +20,10 @@ type PostgresConfig struct {
 	User     string `env:"USER" envDefault:"postgres"`
 	Password string `env:"PASSWORD" envDefault:"postgres"`
 	Database string `env:"DATABASE" envDefault:"postgres"`
+}
+
+type JwtConfig struct {
+	SecretKey string `env:"SECRET_KEY"`
 }
 
 func NewConfig(envPath string) (*Config, error) {
