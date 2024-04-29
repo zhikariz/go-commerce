@@ -24,5 +24,20 @@ func AppPrivateRoutes(userHandler handler.UserHandler) []*route.Route {
 			Path:    "/users",
 			Handler: userHandler.FindAllUser,
 		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/users",
+			Handler: userHandler.CreateUser,
+		},
+		{
+			Method:  http.MethodPut,
+			Path:    "/users/:id",
+			Handler: userHandler.UpdateUser,
+		},
+		{
+			Method:  http.MethodDelete,
+			Path:    "/users/:id",
+			Handler: userHandler.DeleteUser,
+		},
 	}
 }

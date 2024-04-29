@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/zhikariz/go-commerce/internal/entity"
 	"github.com/zhikariz/go-commerce/internal/repository"
 	"github.com/zhikariz/go-commerce/pkg/token"
@@ -13,6 +14,9 @@ import (
 type UserService interface {
 	Login(email string, password string) (string, error)
 	FindAllUser() ([]entity.User, error)
+	CreateUser(user *entity.User) (*entity.User, error)
+	UpdateUser(user *entity.User) (*entity.User, error)
+	DeleteUser(id uuid.UUID) (bool, error)
 }
 
 type userService struct {
@@ -61,4 +65,21 @@ func (s *userService) Login(email string, password string) (string, error) {
 
 func (s *userService) FindAllUser() ([]entity.User, error) {
 	return s.userRepository.FindAllUser()
+}
+
+func (s *userService) CreateUser(user *entity.User) (*entity.User, error) {
+	return s.userRepository.CreateUser(user)
+}
+
+func (s *userService) UpdateUser(user *entity.User) (*entity.User, error) {
+	return s.userRepository.UpdateUser(user)
+}
+
+func (s *userService) DeleteUser(id uuid.UUID) (bool, error) {
+	user, err := s.userRepository.FindUserByID(id)
+	if err != nil {
+		return false, err
+	}
+
+	return s.userRepository.DeleteUser(user)
 }

@@ -10,6 +10,9 @@ type UserRepository interface {
 	FindUserByID(id uuid.UUID) (*entity.User, error)
 	FindUserByEmail(email string) (*entity.User, error)
 	FindAllUser() ([]entity.User, error)
+	CreateUser(user *entity.User) (*entity.User, error)
+	UpdateUser(user *entity.User) (*entity.User, error)
+	DeleteUser(user *entity.User) (bool, error)
 }
 
 type userRepository struct {
@@ -42,4 +45,44 @@ func (r *userRepository) FindAllUser() ([]entity.User, error) {
 		return users, err
 	}
 	return users, nil
+}
+
+func (r *userRepository) CreateUser(user *entity.User) (*entity.User, error) {
+	if err := r.db.Create(&user).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+func (r *userRepository) UpdateUser(user *entity.User) (*entity.User, error) {
+	// Use map to store fields to be updated.
+	fields := make(map[string]interface{})
+
+	// Update fields only if they are not empty.
+	if user.Email != "" {
+		fields["email"] = user.Email
+	}
+	if user.Password != "" {
+		fields["password"] = user.Password
+	}
+	if user.Role != "" {
+		fields["role"] = user.Role
+	}
+	if user.Alamat != "" {
+		fields["alamat"] = user.Alamat
+	}
+
+	// Update the database in one query.
+	if err := r.db.Model(user).Where("id = ?", user.ID).Updates(fields).Error; err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) DeleteUser(user *entity.User) (bool, error) {
+	if err := r.db.Delete(&user).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
