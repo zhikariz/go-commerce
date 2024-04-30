@@ -17,6 +17,7 @@ type UserService interface {
 	CreateUser(user *entity.User) (*entity.User, error)
 	UpdateUser(user *entity.User) (*entity.User, error)
 	DeleteUser(id uuid.UUID) (bool, error)
+	FindUserByID(id uuid.UUID) (*entity.User, error)
 }
 
 type userService struct {
@@ -82,4 +83,8 @@ func (s *userService) DeleteUser(id uuid.UUID) (bool, error) {
 	}
 
 	return s.userRepository.DeleteUser(user)
+}
+
+func (s *userService) FindUserByID(id uuid.UUID) (*entity.User, error) {
+	return s.userRepository.FindUserByID(id)
 }

@@ -10,6 +10,7 @@ type User struct {
 	Alamat   string    `json:"alamat"`
 	NoHp     string    `json:"no_hp"`
 	Auditable
+	Transactions []Transaction `gorm:"foreignKey:UserID;references:ID" json:"transactions"`
 }
 
 func NewUser(email, password, role, alamat, noHp string) *User {

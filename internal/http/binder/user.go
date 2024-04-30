@@ -25,3 +25,7 @@ type UserUpdateRequest struct {
 type UserDeleteRequest struct {
 	ID string `param:"id" validate:"required"`
 }
+
+type UserFindByIDRequest struct {
+	ID string `param:"id" validate:"required"`
+}

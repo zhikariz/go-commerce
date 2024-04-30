@@ -24,10 +24,15 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 }
 
 func (r *userRepository) FindUserByID(id uuid.UUID) (*entity.User, error) {
-	user := new(entity.User)
-	if err := r.db.Where("id = ?", id).Take(&user).Error; err != nil {
+	user := &entity.User{}
+
+	// Lakukan query dan gabungkan tabel users dan transactions
+	if err := r.db.Where("users.id = ?", id).
+		Preload("Transactions").
+		Take(user).Error; err != nil {
 		return user, err
 	}
+
 	return user, nil
 }
 

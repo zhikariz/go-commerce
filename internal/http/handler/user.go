@@ -95,3 +95,20 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, response.SuccessResponse(http.StatusOK, "sukses delete user", isDeleted))
 }
+
+func (h *UserHandler) FindUserByID(c echo.Context) error {
+	var input binder.UserFindByIDRequest
+
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "ada kesalahan input"))
+	}
+
+	id := uuid.MustParse(input.ID)
+
+	user, err := h.userService.FindUserByID(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, response.SuccessResponse(http.StatusOK, "sukses menampilkan data user", user))
+}

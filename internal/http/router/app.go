@@ -39,5 +39,10 @@ func AppPrivateRoutes(userHandler handler.UserHandler) []*route.Route {
 			Path:    "/users/:id",
 			Handler: userHandler.DeleteUser,
 		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/users/:id",
+			Handler: userHandler.FindUserByID,
+		},
 	}
 }
