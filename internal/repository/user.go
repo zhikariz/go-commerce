@@ -1,8 +1,12 @@
 package repository
 
 import (
+	"encoding/json"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/zhikariz/go-commerce/internal/entity"
+	"github.com/zhikariz/go-commerce/pkg/cache"
 	"gorm.io/gorm"
 )
 
@@ -16,11 +20,12 @@ type UserRepository interface {
 }
 
 type userRepository struct {
-	db *gorm.DB
+	db        *gorm.DB
+	cacheable cache.Cacheable
 }
 
-func NewUserRepository(db *gorm.DB) *userRepository {
-	return &userRepository{db}
+func NewUserRepository(db *gorm.DB, cacheable cache.Cacheable) *userRepository {
+	return &userRepository{db: db, cacheable: cacheable}
 }
 
 func (r *userRepository) FindUserByID(id uuid.UUID) (*entity.User, error) {
@@ -46,9 +51,27 @@ func (r *userRepository) FindUserByEmail(email string) (*entity.User, error) {
 
 func (r *userRepository) FindAllUser() ([]entity.User, error) {
 	users := make([]entity.User, 0)
-	if err := r.db.Find(&users).Error; err != nil {
-		return users, err
+
+	key := "FindAllUsers"
+
+	data, _ := r.cacheable.Get(key)
+	if data == "" {
+		if err := r.db.Find(&users).Error; err != nil {
+			return users, err
+		}
+		marshalledUsers, _ := json.Marshal(users)
+		err := r.cacheable.Set(key, marshalledUsers, 5*time.Minute)
+		if err != nil {
+			return users, err
+		}
+	} else {
+		// Data ditemukan di Redis, unmarshal data ke users
+		err := json.Unmarshal([]byte(data), &users)
+		if err != nil {
+			return users, err
+		}
 	}
+
 	return users, nil
 }
 
