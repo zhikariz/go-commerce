@@ -17,11 +17,13 @@ func main() {
 	checkError(err)
 
 	redisDB := cache.InitCache(&cfg.Redis)
+	arcDB, err := cache.InitLRUCache(10)
+	checkError(err)
 
 	tokenUseCase := token.NewTokenUseCase(cfg.JWT.SecretKey)
 
 	publicRoutes := builder.BuildAppPublicRoutes(db, tokenUseCase)
-	privateRoutes := builder.BuildAppPrivateRoutes(db, redisDB)
+	privateRoutes := builder.BuildAppPrivateRoutes(db, redisDB, arcDB)
 
 	srv := server.NewServer("app", publicRoutes, privateRoutes, cfg.JWT.SecretKey)
 	srv.Run()

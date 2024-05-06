@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,12 +20,13 @@ type UserRepository interface {
 }
 
 type userRepository struct {
-	db        *gorm.DB
-	cacheable cache.Cacheable
+	db           *gorm.DB
+	cacheable    cache.Cacheable
+	arcCacheable cache.LRUCacheable
 }
 
-func NewUserRepository(db *gorm.DB, cacheable cache.Cacheable) *userRepository {
-	return &userRepository{db: db, cacheable: cacheable}
+func NewUserRepository(db *gorm.DB, cacheable cache.Cacheable, arcCacheable cache.LRUCacheable) *userRepository {
+	return &userRepository{db: db, cacheable: cacheable, arcCacheable: arcCacheable}
 }
 
 func (r *userRepository) FindUserByID(id uuid.UUID) (*entity.User, error) {
@@ -50,26 +51,24 @@ func (r *userRepository) FindUserByEmail(email string) (*entity.User, error) {
 }
 
 func (r *userRepository) FindAllUser() ([]entity.User, error) {
-	users := make([]entity.User, 0)
-
+	var users []entity.User
 	key := "FindAllUsers"
 
-	data, _ := r.cacheable.Get(key)
-	if data == "" {
-		if err := r.db.Find(&users).Error; err != nil {
-			return users, err
-		}
-		marshalledUsers, _ := json.Marshal(users)
-		err := r.cacheable.Set(key, marshalledUsers, 5*time.Minute)
-		if err != nil {
-			return users, err
-		}
-	} else {
-		// Data ditemukan di Redis, unmarshal data ke users
-		err := json.Unmarshal([]byte(data), &users)
-		if err != nil {
-			return users, err
-		}
+	err := r.arcCacheable.Get(key, &users)
+	if err == nil && len(users) > 0 {
+		fmt.Println(err)
+		fmt.Println(users)
+		return users, nil
+	}
+
+	err = r.db.Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.arcCacheable.Set(key, users, 2*time.Second)
+	if err != nil {
+		return nil, err
 	}
 
 	return users, nil

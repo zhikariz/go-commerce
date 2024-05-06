@@ -1,6 +1,7 @@
 package builder
 
 import (
+	lru "github.com/hnlq715/golang-lru"
 	"github.com/redis/go-redis/v9"
 	"github.com/zhikariz/go-commerce/internal/http/handler"
 	"github.com/zhikariz/go-commerce/internal/http/router"
@@ -13,15 +14,16 @@ import (
 )
 
 func BuildAppPublicRoutes(db *gorm.DB, tokenUseCase token.TokenUseCase) []*route.Route {
-	userRepository := repository.NewUserRepository(db, nil)
+	userRepository := repository.NewUserRepository(db, nil, nil)
 	userService := service.NewUserService(userRepository, tokenUseCase)
 	userHandler := handler.NewUserHandler(userService)
 	return router.AppPublicRoutes(userHandler)
 }
 
-func BuildAppPrivateRoutes(db *gorm.DB, redisDB *redis.Client) []*route.Route {
+func BuildAppPrivateRoutes(db *gorm.DB, redisDB *redis.Client, arcDB *lru.ARCCache) []*route.Route {
 	cacheable := cache.NewCacheable(redisDB)
-	userRepository := repository.NewUserRepository(db, cacheable)
+	arcCacheable := cache.NewARCCacheable(arcDB)
+	userRepository := repository.NewUserRepository(db, cacheable, arcCacheable)
 	userService := service.NewUserService(userRepository, nil)
 	userHandler := handler.NewUserHandler(userService)
 	return router.AppPrivateRoutes(userHandler)
