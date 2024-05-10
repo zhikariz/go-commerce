@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50),
     alamat TEXT,
-    no_hp VARCHAR(20)
+    no_hp VARCHAR(50)
 );
 
 COMMIT;

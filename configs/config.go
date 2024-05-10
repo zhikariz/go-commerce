@@ -13,6 +13,12 @@ type Config struct {
 	Postgres PostgresConfig `envPrefix:"POSTGRES_"`
 	JWT      JwtConfig      `envPrefix:"JWT_"`
 	Redis    RedisConfig    `envPrefix:"REDIS_"`
+	Encrypt  EncryptConfig  `envPrefix:"ENCRYPT_"`
+}
+
+type EncryptConfig struct {
+	SecretKey string `env:"SECRET_KEY"`
+	IV        string `env:"IV"`
 }
 
 type RedisConfig struct {
