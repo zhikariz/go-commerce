@@ -21,7 +21,7 @@ func InitCache(config *configs.RedisConfig) *redis.Client {
 
 type Cacheable interface {
 	Set(key string, value interface{}, expiration time.Duration) error
-	Get(key string) (string, error)
+	Get(key string) string
 }
 
 type cacheable struct {
@@ -42,10 +42,10 @@ func (c *cacheable) Set(key string, value interface{}, expiration time.Duration)
 	return nil
 }
 
-func (c *cacheable) Get(key string) (string, error) {
+func (c *cacheable) Get(key string) string {
 	val, err := c.rdb.Get(context.Background(), key).Result()
 	if err == redis.Nil {
-		return "", nil
+		return ""
 	}
-	return val, err
+	return val
 }

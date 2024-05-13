@@ -24,14 +24,13 @@ type userRepository struct {
 	cacheable cache.Cacheable
 }
 
-func NewUserRepository(db *gorm.DB, cacheable cache.Cacheable) *userRepository {
+func NewUserRepository(db *gorm.DB, cacheable cache.Cacheable) UserRepository {
 	return &userRepository{db: db, cacheable: cacheable}
 }
 
 func (r *userRepository) FindUserByID(id uuid.UUID) (*entity.User, error) {
-	user := &entity.User{}
+	user := new(entity.User)
 
-	// Lakukan query dan gabungkan tabel users dan transactions
 	if err := r.db.Where("users.id = ?", id).
 		Preload("Transactions").
 		Take(user).Error; err != nil {
@@ -54,7 +53,7 @@ func (r *userRepository) FindAllUser() ([]entity.User, error) {
 
 	key := "FindAllUsers"
 
-	data, _ := r.cacheable.Get(key)
+	data := r.cacheable.Get(key)
 	if data == "" {
 		if err := r.db.Find(&users).Error; err != nil {
 			return users, err
