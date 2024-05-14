@@ -20,15 +20,15 @@ func NewUserHandler(userService service.UserService) UserHandler {
 }
 
 func (h *UserHandler) Login(c echo.Context) error {
-	input := binder.UserLoginRequest{}
+	input := new(binder.UserLoginRequest)
 
-	if err := c.Bind(&input); err != nil {
+	if err := c.Bind(input); err != nil {
 		return c.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "ada kesalahan input"))
 	}
 
 	user, err := h.userService.Login(input.Email, input.Password)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, response.SuccessResponse(http.StatusOK, "login success", user))

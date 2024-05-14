@@ -1,6 +1,7 @@
 package repository_test
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
+	"github.com/zhikariz/go-commerce/internal/entity"
 	"github.com/zhikariz/go-commerce/internal/repository"
 	mock_cache "github.com/zhikariz/go-commerce/test/mock/pkg/cache"
 	"go.uber.org/mock/gomock"
@@ -97,5 +99,26 @@ func (s *UserTestSuite) TestFindAllUser() {
 		users, err := s.repo.FindAllUser()
 		s.Nil(err)
 		s.NotNil(users)
+	})
+}
+
+func (s *UserTestSuite) TestCreateUser() {
+	s.Run("error create user", func() {
+		s.mock.ExpectBegin()
+		s.mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "users"`)).
+			WillReturnError(errors.New("error"))
+		s.mock.ExpectRollback()
+		user, err := s.repo.CreateUser(&entity.User{})
+		s.NotNil(err)
+		s.Equal(uuid.Nil, user.ID)
+	})
+	s.Run("success create user", func() {
+		s.mock.ExpectBegin()
+		s.mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "users"`)).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		s.mock.ExpectCommit()
+		user, err := s.repo.CreateUser(&entity.User{})
+		s.Nil(err)
+		s.NotNil(user)
 	})
 }

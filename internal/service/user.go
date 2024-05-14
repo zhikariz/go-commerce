@@ -28,7 +28,7 @@ type userService struct {
 	encryptTool    encrypt.EncryptTool
 }
 
-func NewUserService(userRepository repository.UserRepository, tokenUseCase token.TokenUseCase, encryptTool encrypt.EncryptTool) *userService {
+func NewUserService(userRepository repository.UserRepository, tokenUseCase token.TokenUseCase, encryptTool encrypt.EncryptTool) UserService {
 	return &userService{
 		userRepository: userRepository,
 		tokenUseCase:   tokenUseCase,
